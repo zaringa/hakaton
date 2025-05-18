@@ -1,0 +1,4 @@
+intersection_id,cycle_sec,green_main_sec,green_secondary_sec,lost_time_sec_per_phase
+1,120,40,20,4
+2,120,40,20,4
+3,120,40,20,4

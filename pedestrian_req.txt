@@ -1,0 +1,1 @@
+Minimal pedestrian green time per cycle: 10 seconds

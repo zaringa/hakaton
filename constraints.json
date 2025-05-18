@@ -1,0 +1,13 @@
+{
+    "min_cycle_sec": 60,
+    "max_cycle_sec": 180,
+    "min_green_sec": 15,
+    "pedestrian_green_sec": 10,
+    "lost_time_sec_per_phase": 4,
+    "bus_priority": {
+      "intersection_id": 2,
+      "priority_direction": "NS",
+      "min_extra_green_sec": 5
+    }
+  }
+  
