@@ -1,13 +1,14 @@
 import pandas as pd
 from collections import defaultdict
+import networkx as nx
+import matplotlib.pyplot as plt
 
 class Edge:
     def __init__(self, speed, length, priority):
         self.speed = speed
         self.length = length
-        self.time = length / (speed * 1000 / 3600)
         self.priority = priority
-        self.weight = 1 / self.time if self.time > 0 else 0
+        self.weight = 1 / (self.length / (self.speed * 1000 / 3600)) if (self.length / (self.speed * 1000 / 3600))> 0 else 0
         self.used_in_iteration = None
 
 class Graph:
@@ -57,7 +58,6 @@ class Graph:
         sorted_edges = sorted(self.all_edges, key=lambda x: x[2].priority, reverse=True)
         used_edges = set() 
         sequential_paths = []
-        iteration = 1
 
         while True:
             found_path = False
@@ -67,18 +67,14 @@ class Graph:
 
                     if best_path and len(best_path) > 1:
                         found_path = True
-                        sequential_paths.append((iteration, best_path))
-                        print(iteration, best_path)
+                        sequential_paths.append((best_path, (edge.length / (edge.speed * 1000 / 3600))))
                         for i in range(len(best_path) - 1):
                             used_edges.add((best_path[i], best_path[i+1]))
                             used_edges.add((best_path[i+1], best_path[i]))
             if not found_path:
                 break
-            iteration += 1
 
         return sequential_paths
-
-
 
     @classmethod
     def from_csv(cls, filename):
@@ -86,14 +82,35 @@ class Graph:
         df = pd.read_csv(filename, header=None,
                          names=['u', 'v', 'length', 'speed', 'priority'])
 
-        for _, row in df.iterrows():
+        for i, row in df.iterrows():
             graph.add_edge(row['u'], row['v'], row['speed'], row['length'], row['priority'])
         return graph
 
+    def visualize_graph(self, paths=None):
+        """Визуализирует граф с помощью networkx."""
+        G = nx.Graph()
+        for u, v, edge in self.all_edges:
+            G.add_edge(u, v, weight=edge.weight)
 
+        pos = nx.spring_layout(G)  # определяем layout графа
+
+        # Рисуем граф
+        nx.draw_networkx_nodes(G, pos, node_size=700)
+        nx.draw_networkx_edges(G, pos)
+        nx.draw_networkx_labels(G, pos, font_size=10, font_family="sans-serif")
+
+        # Если переданы пути, выделяем их
+        if paths:
+            for path, _ in paths:
+                edges = [(path[i], path[i + 1]) for i in range(len(path) - 1)]
+                nx.draw_networkx_edges(G, pos, edgelist=edges, edge_color="red", width=2)
+
+        plt.title("Graph Visualization")
+        plt.axis("off")
+        plt.show()
+
+
+# Пример использования
 g = Graph.from_csv('svias.csv')
-def way():
-    sequential_paths = g.build_sequential_paths()
-    for priority, path in sequential_paths:
-        print(f"{' -> '.join(path)}")
-way()
+sequential_paths = g.build_sequential_paths()
+g.visualize_graph(sequential_paths)
